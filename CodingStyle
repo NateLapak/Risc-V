@@ -1,0 +1,68 @@
+CodingStyle.asm
+# This file is about coding style in RISC-V
+
+#-------------------------------------------
+# Basics - Coding Style
+# Author: Noah Gergel
+# Date: May 5 2020
+#-------------------------------------------
+
+.text
+
+# RISC-V coding style is summed up as: Use function/routine headers, comment your code, and modularize code
+# into blocks of code. It's basically the same as other programming languages.
+
+
+
+
+# Example of a function header, and some commenting.
+# Included is an implementation of said function but know that
+# the specifics of its implementation are not the important take away.
+
+#-------------------------------------------------------------------------------
+# SetUppercase
+# A function that converts all of the lower case characters in a null-terminated
+# string to upper case.
+#
+# Arguments:
+#   	a0: Memory address of the string.
+# Return Values:
+#   	None
+# Side Effects:
+#   	Converts all lowercase letters to uppercase in the given string in memory.
+# Register Usage:
+#   	t0, t1: Intermediary for determining if a char is lowercase.
+#   	t2: Stores characters of the string as we loop through it.
+#
+#-------------------------------------------------------------------------------
+SetUppercase:
+	# Initialize registers for comparisions latter on, to check if a char is lowercase.
+	addi	t0, zero, 97	# t0 <- ascii val of 'a'
+	addi	t1, zero, 123   # t1 <- ascii val of 'z' + 1
+
+_loop:
+	# We loop through reading each char of the string.
+	lbu 	t2, 0(a0)   	# t2 <- Memory[a0]
+	beq 	t2, zero, _loopDone # Stop looping if we hit null-terminator
+
+	# Check if it is a lowercase char or not.
+	blt 	t2, t0, _loopNext # Branch if t2 < 'a' in ascii
+	bge 	t2, t1, _loopNext # Branch if t2 > 'z' in ascii
+
+	# If it is lower case, convert to uppercase and save.
+	addi	t2, t2, -32 	# t2 <- uppercase equiv
+	sb  	t2, 0(a0)
+
+_loopNext:
+	# Continue to the next character.
+	addi	a0, a0, 1   	# a0++, shift address over to the next character
+	jal 	zero, _loop 	# Jump to start of loop
+    
+_loopDone:
+	# Return to where this routine was called from.
+	jalr zero, ra, 0
+
+
+
+
+
